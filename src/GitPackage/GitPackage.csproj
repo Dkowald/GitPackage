@@ -1,0 +1,34 @@
+﻿ <Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    
+    <Authors>Derek Kowald</Authors>
+    <Company />
+    <Description>Tooling to use git repository as a package in .NET projects.</Description>
+    <PackageTags>MSBuild Git Packages</PackageTags>
+    <Version>0.1.0</Version>
+
+    <RepositoryType>Git</RepositoryType>
+    <PackageLicenseUrl>https://github.com/Dkowald/GitPackage/blob/master/LICENSE</PackageLicenseUrl>
+    <PackageProjectUrl>https://github.com/Dkowald/GitPackage</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/Dkowald/GitPackage</RepositoryUrl>
+
+    <DisableImplicitFrameworkReferences>true</DisableImplicitFrameworkReferences>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <OutputPath>./lib</OutputPath>
+  </PropertyGroup>
+  
+  <ItemGroup>
+    <Content Include="build\**" target="build" Pack="true" PackagePath="%(Identity)" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Build.Utilities.Core" Version="15.8.166" ExcludeAssets="Runtime" PrivateAssets="All"  />
+    <PackageReference Include="NETStandard.Library" Version="2.0.1" PrivateAssets="All" />
+  </ItemGroup>
+
+</Project>

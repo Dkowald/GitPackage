@@ -1,0 +1,8 @@
+.vscode/
+.vs/
+
+src/**/*.user
+
+bin/
+obj/
+lib/

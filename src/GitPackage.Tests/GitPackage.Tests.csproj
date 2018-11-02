@@ -1,0 +1,29 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
+
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.App" Version="2.1.5" />
+    <PackageReference Include="Microsoft.Build.Utilities.Core" Version="15.8.166" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.8.0" />
+    <PackageReference Include="MSTest.TestAdapter" Version="1.3.2" />
+    <PackageReference Include="MSTest.TestFramework" Version="1.3.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="GitPackage" Version="0.1.0" /> 
+
+    <!-- sample git packages -->
+    <GitPackage Include="AbsUrl" Version="1.0.0" Uri="https://gist.github.com/383acd462242194024981fbe53a84980.git" />
+    <GitPackage Include="HttpError" Version="1.0.0" Uri="https://gist.github.com/6414276f4e3745473c699c1941549710.git" />
+  </ItemGroup>
+
+  <!--<ItemGroup>
+    <ProjectReference Include="..\GitPackage\GitPackage.csproj"/>
+  </ItemGroup>
+  <Import Project="../GitPackage/build/GitPackage.targets"/>-->
+
+</Project>

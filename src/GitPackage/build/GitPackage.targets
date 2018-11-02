@@ -1,0 +1,112 @@
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <PropertyGroup>
+    <GitRepoCache Condition="'$(GitRepoCache)' == '' And '$(HOME)' != ''">$(HOME)\.gitpack</GitRepoCache>
+    <GitRepoCache Condition="'$(GitRepoCache)' == '' And '$(USERPROFILE)' != ''">$(USERPROFILE)\.gitpack</GitRepoCache>
+
+    <PrjGist Condition="'$(PrjGist)' == ''">$(MSBuildProjectDirectory)\gist</PrjGist>
+
+    <GitPack-AutoRestore Condition="'$(GitPack-AutoRestore)' == ''">true</GitPack-AutoRestore>
+  </PropertyGroup>
+
+  <Target Name="GitPackRestore" DependsOnTargets="gpInit; gpClone; gpFetch; gpPrune; gpCheckout" />
+
+  <Target Name="gpAutoRestore"
+      BeforeTargets="Restore"
+      DependsOnTargets="GitPackRestore"
+      Condition="'$(GitPack-AutoRestore)' == 'true'">
+    <Message Text="Restored git packages" Importance="High" />
+  </Target>
+
+  <Target Name="gpAutoRestoreInVStudio"
+          BeforeTargets="Build"
+          DependsOnTargets="gpAutoRestore"
+          Condition="$(BuildingInsideVisualStudio) == 'true'">
+    <!--Because restore target doesn't appear to run in VStudio...-->
+  </Target>
+
+  <Target Name="gpInit">
+    <MakeDir Directories="$(GitRepoCache)" />
+    <MakeDir Directories="$(PrjGist)" />
+    <Error Text="Missing version for GitPackage %(GitPackage.Identity)"
+           Condition="'%(GitPackage.Version)' == ''" />
+
+    <Error Text="Missing Uri for GitPackage %(GitPackage.Identity)"
+           Condition="'%(GitPackage.Uri)' == ''" />
+
+    <CollectGitPackageInfo Root="$(PrjGist)" Items="@(GitPackage)">
+      <Output TaskParameter="Info" ItemName="gpInfo" />
+    </CollectGitPackageInfo>
+  </Target>
+
+  <Target Name="gpClone" Inputs="@(GitPackage)" Outputs="@(GitPackage -> '$(GitRepoCache)/%(Identity)/.git/')">
+    <Message
+        Text="clone '%(GitPackage.Uri)' to '%(GitPackage.Identity)'"
+        Condition="!Exists( '$(GitRepoCache)/%(GitPackage.Identity)' )"
+        Importance="High"  />
+
+    <Exec Command="git clone --bare %(GitPackage.Uri) %(GitPackage.Identity)"
+        WorkingDirectory="$(GitRepoCache)"
+        Condition="!Exists( '$(GitRepoCache)/%(GitPackage.Identity)' )" />
+  </Target>
+
+  <Target Name="gpFetch" Outputs="%(GitPackage.Identity)">
+
+    <Exec Command="git describe --tags --match %(GitPackage.Version)"
+      StandardErrorImportance="Low"
+      StandardOutputImportance = "Low"
+      WorkingDirectory="$(GitRepoCache)/%(GitPackage.Identity)"
+      IgnoreExitCode="true">
+      <Output TaskParameter="ExitCode" PropertyName="ExitCode" />
+    </Exec>
+
+    <Message
+      Text="Fetching latest for %(GitPackage.Identity)"
+      Condition="$(ExitCode) != '0'"
+      Importance="High"  />
+
+    <Exec Command="git fetch --tags --prune origin master:master"
+      StandardOutputImportance="High"
+      StandardErrorImportance="High"
+      WorkingDirectory="$(GitRepoCache)/%(GitPackage.Identity)"
+      Condition="$(ExitCode) != '0'">
+    </Exec>
+
+  </Target>
+
+  <Target Name="gpPrune">
+    <ItemGroup>
+      <rmDir Include="@(gpInfo)"
+        Condition="(%(gpInfo.Actual) == '' Or %(gpInfo.Actual) != %(gpInfo.Version)) And %(gpInfo.Workspace) != ''"/>
+
+      <rm Include="@(gpInfo)"
+        Condition="(%(gpInfo.Actual) == '' Or %(gpInfo.Actual) != %(gpInfo.Version)) And %(gpInfo.VerFile) != ''"/>
+    </ItemGroup>
+
+    <Message
+      Text="Pruning"
+      Condition=" '@(rmDir)' != '' Or '@(rm)' != ''"
+      Importance="High"  />
+
+    <RemoveDir Directories="%(rmDir.Workspace)" />
+    <Delete Files="%(rm.VerFile)" />
+
+  </Target>
+
+  <Target Name="gpCheckout" Outputs="%(GitPackage.Identity)">
+
+    <Exec Command="git worktree prune"
+      WorkingDirectory="$(GitRepoCache)\%(GitPackage.Identity)"
+      Condition="!Exists('$(PrjGist)/%(GitPackage.Identity)/')" />
+
+    <Exec Command="git worktree add $(PrjGist)\%(GitPackage.Filename) tags/%(GitPackage.Version)"
+      WorkingDirectory="$(GitRepoCache)\%(GitPackage.Identity)"
+      Condition="!Exists('$(PrjGist)/%(GitPackage.Identity)/')">
+    </Exec>
+
+    <WriteLinesToFile Overwrite="true" File="$(PrjGist)\%(GitPackage.Identity).ver" Lines="%(GitPackage.Version)" />
+  </Target>
+
+  <UsingTask TaskName="GitPackage.CollectGitPackageInfo" 
+    AssemblyFile="$(MSBuildThisFileDirectory)..\lib\netstandard2.0\GitPackage.dll" />
+</Project>
