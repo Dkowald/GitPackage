@@ -1,0 +1,32 @@
+﻿@page
+<markdown>
+  # GitPackage wiki
+ 
+  GitPackage aims to use Git Repositories in a similar way as NuGet packages.
+
+  ## Why? 
+  Sometimes I just want to share a few lines of code between projects.
+  
+  These little code blocks are often too small to warrant creating a nuget package.
+  
+  I use this approach so I could easily share code, without significant overhead or complexity.
+  
+  
+  ## Limitations
+
+  This is **NOT** a full-fledged package manager.
+
+  There's no inter-package dependencies, and it only handles simple version strings.
+
+  This simplicity makes it far easier to understand how GitPackage behaves; at the expense of more robust
+  package management tasks.
+
+  ## When to use GitPackage
+
+  Use a GitPackage for sharing small code bits, that aren't big enough for their own a Assembly / nuget package.
+
+  For instance, one of my favorites is a couple of classes I use to provide extensions to FileInfo and
+  DirectoryInfo.
+
+  Way too small for the over-head of a nuget package, but just right for source-code sharing.
+</markdown>

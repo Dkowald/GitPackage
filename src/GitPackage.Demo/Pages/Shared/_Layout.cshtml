@@ -1,0 +1,25 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>@ViewBag.Title</title>
+
+    <link rel="stylesheet"
+          href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/styles/default.min.css">
+    <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/highlight.min.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+</head>
+
+<body>
+<nav>
+    <ul>
+        <li><a href="/">Home</a></li>
+        <li><a asp-page="/10-UsageDetails">Usage details</a></li>
+        <li><a asp-page="/20-HowItWorks">How it works</a></li>
+        <li><a asp-page="/50-MyGitPackages">Sample packages</a></li>
+        <li><a asp-page="/90-Credits">Credits</a></li>
+    </ul>
+</nav>
+@RenderBody()
+</body>
+</html>

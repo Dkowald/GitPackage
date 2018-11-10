@@ -1,0 +1,25 @@
+﻿@page
+<markdown>
+  ## Usage Details
+
+  The Git command **MUST** be available on the path.
+
+  The git repository should use **Tags** to identify specific version(s).
+
+  Add reference to the package.
+
+  ```XML
+  <ItemGroup>
+    <GitPackage Include="Sample"
+                Version="2"
+                Uri="C:\tmp\Sample" />
+  </ItemGroup>
+  ```
+  Where
+
+  |Attribute| Sample|  Description|
+  |-------- |--------|-----------|
+  | Include | Sample | Name used for package |
+  | Version | 2      |Git tag used to identify version |
+  | Uri     | C:\tmp\Sample | Uri to git repository |
+</markdown>
