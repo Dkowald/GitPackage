@@ -9,14 +9,16 @@
     <Title>GitPackage</Title>
     <Description>MSBuild tooling to use a Git Repository as a Package</Description>
     <PackageTags>MSBuild Git Packages</PackageTags>
-    <Version>0.1.0</Version>
+    <Version>0.2.0</Version>
 
     <NeutralLanguage>en-AU</NeutralLanguage>
     <RepositoryType>Git</RepositoryType>
     <PackageLicenseUrl>https://github.com/Dkowald/GitPackage/blob/master/LICENSE</PackageLicenseUrl>
     <PackageProjectUrl>https://github.com/Dkowald/GitPackage</PackageProjectUrl>
     <RepositoryUrl>https://github.com/Dkowald/GitPackage</RepositoryUrl>
-    <PackageReleaseNotes>Initial build for using git repository's in similar way as normal package references.</PackageReleaseNotes>
+    <PackageReleaseNotes>
+      Add support for git packages without a specific version.
+    </PackageReleaseNotes>
 
     <DisableImplicitFrameworkReferences>true</DisableImplicitFrameworkReferences>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
