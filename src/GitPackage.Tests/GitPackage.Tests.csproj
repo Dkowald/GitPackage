@@ -11,15 +11,24 @@
     <PackageReference Include="MSTest.TestFramework" Version="1.3.2" />
   </ItemGroup>
 
-  <ItemGroup>
-    <!-- sample git packages -->
-    <GitPackage Include="FileInfoExtensions" Version="1.0.0" Uri="https://gist.github.com/df49cda62ea033be1eda60333921675a.git"/>
-  </ItemGroup>
-
   <!--Direct add project for testing-->
   <ItemGroup>
     <ProjectReference Include="..\GitPackage\GitPackage.csproj"/>
   </ItemGroup>
   <Import Project="../GitPackage/build/GitPackage.targets"/>
+
+  <ItemGroup>
+    <!-- sample git packages needs local repo for testing -->
+    
+
+    <!-- <GitPackage Include="SampleTaged" Uri="C:\tmp\Sample" Version='1' /> -->
+
+    <!-- <GitPackage Include="SampleTaged" Uri="C:\tmp\Sample" Version='2' /> -->
+
+    <!-- <GitPackage Include="SampleTaged" Uri="C:\tmp\Sample" Version='3' /> -->
+
+    <!-- <GitPackage Include="SampleUnversioned" Uri="C:\tmp\Sample" />  -->
+
+  </ItemGroup>
 
 </Project>
