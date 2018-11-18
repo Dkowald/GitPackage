@@ -19,7 +19,7 @@
 
   <ItemGroup>
     <!-- sample git packages needs local repo for testing -->
-    
+   
 
     <!-- <GitPackage Include="SampleTaged" Uri="C:\tmp\Sample" Version='1' /> -->
 
@@ -27,7 +27,7 @@
 
     <!-- <GitPackage Include="SampleTaged" Uri="C:\tmp\Sample" Version='3' /> -->
 
-    <!-- <GitPackage Include="SampleUnversioned" Uri="C:\tmp\Sample" />  -->
+    <!-- <GitPackage Include="SampleUnversioned" Uri="C:\tmp\Sample" /> -->
 
   </ItemGroup>
 

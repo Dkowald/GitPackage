@@ -27,3 +27,11 @@ Replace 2.txt with 3.txt. Commit.
 12. Remove versioned package - restore - deletes version package files
 13. Remove unversioned package - restore - deletes un versioned package.
 14.  - refresh - no work.
+
+
+### Manual refresh via file delete.
+
+1. Build with an unversioned package.
+2. Update the repo.
+3. Delete the local files (ver file and folder).
+4. - restore - fetches latest and checks out changes.
