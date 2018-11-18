@@ -10,7 +10,7 @@
   </PropertyGroup>
 
   <Target Name="GitPackRestore" DependsOnTargets=
-    "gpInit;gpPruneRemoved;gpClone;gpFetch;gpPrune;gpCheckout" />
+    "gpInit;gpPruneRemoved;gpClone;gpFetch;gpFetchAutoRefresh;gpPrune;gpCheckout" />
 
   <Target Name="GitPackRefresh" DependsOnTargets=
     "gpInit;gpPruneRemoved;gpClone;gpFetchWithUnversioned;gpPruneWithUnversioned;gpCheckout" />
@@ -67,6 +67,11 @@
       <ItemGroup>
         <gpVersioned Include="@(gpInfo)" 
         Condition=" '%(gpInfo.Version)' != ''"/>
+      </ItemGroup>
+
+      <ItemGroup>
+        <gpAutoRefreshUnversioned Include="@(gpInfo)"
+          Condition=" %(gpInfo.Version) == '' And !Exists('%(gpInfo.VerFile)')"/>
       </ItemGroup>
 
   </Target>
@@ -130,7 +135,16 @@
     </Exec>
 
   </Target>
-  
+
+  <Target Name="gpFetchAutoRefresh">
+      <Exec Command="git fetch --tags --prune origin master:master"
+      StandardOutputImportance="High"
+      StandardErrorImportance="High"
+      WorkingDirectory="%(gpAutoRefreshUnversioned.gpRepoDir)"
+      Condition=" @(gpAutoRefreshUnversioned) != ''">
+    </Exec>
+  </Target>
+
   <Target Name="gpPruneRemoved">
     <RemoveDir Directories="%(gpRemoved.Workspace)" />
     <Delete Files="%(gpRemoved.VerFile)" />
@@ -140,13 +154,15 @@
     <ItemGroup>
       <pruneItem Include="@(gpVersioned)"
         Condition=" '%(gpVersioned.Actual)' != '%(gpVersioned.Version)' "/>
+        
+      <pruneItem Include="@(gpAutoRefreshUnversioned)" />
     </ItemGroup>
 
     <Message Text="Prune %(pruneItem.Identity)" Condition=" '@(pruneItem)' != ''" />
 
-    <RemoveDir Directories="%(pruneItem.Workspace)" />
+    <RemoveDir Directories="%(pruneItem.gpWorktree)" />
 
-    <Delete Files="%(pruneItem.VerFile)" />
+    <Delete Files="%(pruneItem.gpVerFile)" />
 
   </Target>
 
