@@ -171,10 +171,10 @@
       <Delete Files="%(gpUnversioned.VerFile)" />
   </Target>
   
-  <Target Name="gpCheckout" Outputs="%(gpInfo.Identity)">
+  <Target Name="gpCheckout" Outputs="%(gpInfo.Identity)" Condition=" '@(gpInfo)' != ''">
 
     <Message Text="Checkout %(gpInfo.Identity)"
-        Condition="!Exists('%(gpInfo.gpWorktree)') And '@(gpInfo)' !=''"
+        Condition="!Exists('%(gpInfo.gpWorktree)')"
         Importance="High"  />
 
     <Exec Command="git worktree prune"
