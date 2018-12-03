@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
+  </PropertyGroup>
+
+  <!--Direct add project for testing-->
+  <ItemGroup>
+    <ProjectReference Include="../../../GitPackage/GitPackage.csproj"/>
+  </ItemGroup>
+  <Import Project="../../../GitPackage/build/GitPackage.targets"/>
+
+  <Import Project="../../TestData.targets"/>
+
+<!--Get same repo packages for different project -->
+<ItemGroup>
+  <GitPackage Include="SampleUnversioned" Uri="$(SampleRepo)" />
+
+  <!-- <GitPackage Include="SampleTaged" Version='1' Uri="$(SampleRepo)"  /> -->
+
+  <GitPackage Include="SampleTaged"  Version='3' Uri="$(SampleRepo)" />
+    
+</ItemGroup>
+
+</Project>

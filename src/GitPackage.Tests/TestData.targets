@@ -1,0 +1,6 @@
+<Project>
+<PropertyGroup>
+    <!--Sample repo pre-setup for tests-->
+    <SampleRepo>c:\tmp\SampleRepo</SampleRepo>
+  </PropertyGroup>
+</Project>
