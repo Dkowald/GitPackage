@@ -1,6 +1,9 @@
-﻿using Microsoft.AspNetCore.Builder;
+﻿using GitPackage.Demo.Components;
+using GitPackage.Demo.Model;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.IdentityModel.Tokens.Saml;
 
 namespace GitPackage.Demo
 {
@@ -17,11 +20,16 @@ namespace GitPackage.Demo
 		{
 			services.AddMvc()
 				.AddControllersAsServices();
+
+		  services.AddScoped<WikiPageProvider>();
+      services.AddScoped<WikiPages>();
 		}
 
 		public void Configure(IApplicationBuilder app)
 		{
-			app.UseMvc();
+		  app.UseDeveloperExceptionPage();
+
+			app.UseMvcWithDefaultRoute();
 		}
 	}
 }

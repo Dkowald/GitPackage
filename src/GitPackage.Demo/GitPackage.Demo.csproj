@@ -5,6 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="CommonMark.NET" Version="0.15.1" />
     <PackageReference Include="Microsoft.AspNetCore.App" Version="2.1.5" />
     <PackageReference Include="TagHelperSamples.Markdown" Version="2.0.30" />
   </ItemGroup>
@@ -17,5 +18,7 @@
     <GitPackage Include="FileInfoExtensions" Version="1.0.0" Uri="https://gist.github.com/df49cda62ea033be1eda60333921675a.git" />
     <GitPackage Include="AbsUrl" Version="1.0.0" Uri="https://gist.github.com/383acd462242194024981fbe53a84980.git" />
     <GitPackage Include="ResponseBuffer" Uri="https://gist.github.com/Dkowald/28ea6f6bd38562c131a76052587c6268" />
+
+    <GitPackage Include="GitPackageWiki" Uri="https://github.com/Dkowald/GitPackage.wiki.git"/>
   </ItemGroup>
 </Project>
