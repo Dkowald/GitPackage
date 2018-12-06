@@ -42,7 +42,7 @@ Repo created via: buildRepo.ps1
 4. dotnet build
 5. Sample now has v2
 6. dotnet build; no work all up to date.
-7. Cli: tag latest Sample with v6.
+7. Cli: tag latest Sample with v6. (git tag -a 6 -m 6 && git push --tags)
 8. Replace SampleTaged with v6.
 9. dotnet build; fetches latest from repo, check out v6
 10. Replace SampleTaged with invalidVersion
@@ -63,4 +63,4 @@ Repo created via: buildRepo.ps1
 ### Clean up.
 1. Comment out all gitpackages.
 2. Build - all git packages removed.
-3. rebuild Sample repo.
+3. delete Sample repo.

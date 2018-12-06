@@ -26,7 +26,7 @@
 
     <!-- <GitPackage Include="SampleAttachedAlt" Uri="$(SampleRepo)" Attach="AltBranch" /> -->
 
-    <!--<GitPackage Include="SampleUnversioned" Uri="$(SampleRepo)" />-->
+    <!-- <GitPackage Include="SampleUnversioned" Uri="$(SampleRepo)" /> -->
     
 
     <!-- <GitPackage Include="SampleTaged" Version='1' Uri="$(SampleRepo)"  /> -->
@@ -37,7 +37,7 @@
 
     <!-- <GitPackage Include="SampleTaged" Version='inValidVersion' Uri="$(SampleRepo)" /> -->
 
-    <!--<GitPackage Include="SampleTaged" Version='3' Uri="$(SampleRepo)"  />-->
+    <!-- <GitPackage Include="SampleTaged" Version='3' Uri="$(SampleRepo)"  /> -->
     
   </ItemGroup>
 

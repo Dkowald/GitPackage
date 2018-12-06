@@ -14,11 +14,11 @@
 
 <!--Get same repo packages for different project -->
 <ItemGroup>
-  <GitPackage Include="SampleUnversioned" Uri="$(SampleRepo)" />
+  <!-- <GitPackage Include="SampleUnversioned" Uri="$(SampleRepo)" /> -->
 
   <!-- <GitPackage Include="SampleTaged" Version='1' Uri="$(SampleRepo)"  /> -->
 
-  <GitPackage Include="SampleTaged"  Version='3' Uri="$(SampleRepo)" />
+  <!-- <GitPackage Include="SampleTaged"  Version='3' Uri="$(SampleRepo)" /> -->
     
 </ItemGroup>
 

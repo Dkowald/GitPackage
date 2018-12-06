@@ -9,11 +9,26 @@
     <GitPack-AutoRestore Condition="'$(GitPack-AutoRestore)' == ''">true</GitPack-AutoRestore>
   </PropertyGroup>
 
-  <Target Name="GitPackRestore" DependsOnTargets=
-    "gpInit;gpPruneRemoved;gpClone;gpFetch;gpFetchAutoRefresh;gpPrune;gpCheckout;gpCheckoutAttached" />
+  <PropertyGroup>
+      <GitPackRestoreDependsOn>
+        gpInit; gpPruneRemoved;
+        gpClone;
+        gpFetch; gpFetchAutoRefresh;
+        gpPrune;
+        gpCheckout; gpCheckoutAttached
+      </GitPackRestoreDependsOn>
 
-  <Target Name="GitPackRefresh" DependsOnTargets=
-    "gpInit;gpPruneRemoved;gpClone;gpFetchWithUnversioned;gpPruneWithUnversioned;gpCheckout;gpCheckoutAttached" />
+      <GitPackRefreshDependsOn>
+      gpInit; gpPruneRemoved;
+      gpClone;
+      gpFetchWithUnversioned; gpPruneWithUnversioned;
+      gpCheckout; gpCheckoutAttached
+      </GitPackRefreshDependsOn>
+  </PropertyGroup>
+   
+  <Target Name="GitPackRestore" DependsOnTargets="$(GitPackRestoreDependsOn)" />
+
+  <Target Name="GitPackRefresh" DependsOnTargets="$(GitPackRefreshDependsOn)" />
   
   <Target Name="gpAutoRestore"
       BeforeTargets="Restore"
@@ -57,27 +72,33 @@
           <!-- if nothing, use detached master as unversioned-->
           <gpCommitish Condition=" '%(gpInfo.Version)' == '' And '%(gpInfo.Attach)' == ''">--detach master</gpCommitish>
 
-          <gpRepoDir>$(GitRepoCache)\%(gpInfo.Identity)</gpRepoDir>
+          <!--Use repo cache except for attached-->
+          <gpRepoDir Condition="'%(gpInfo.Attach)' == ''">$(GitRepoCache)\%(gpInfo.Identity)</gpRepoDir>
+          <gpRepoDir Condition="'%(gpInfo.Attach)' != ''">$(PrjGist)\%(gpInfo.Identity)</gpRepoDir>
+
           <gpVerFile>$(PrjGist)\%(gpInfo.Identity).ver</gpVerFile>
           <gpWorktree>$(PrjGist)\%(gpInfo.Identity)</gpWorktree>
         </gpInfo>
       </ItemGroup>
 
     <ItemGroup>
-      <gpUnversioned Include="@(gpInfo)" 
-        Condition=" '%(gpInfo.Version)' == ''"/>
-
       <gpVersioned Include="@(gpInfo)" 
         Condition=" '%(gpInfo.Version)' != ''"/>
 
-      <gpAutoRefreshUnversioned Include="@(gpInfo)"
-        Condition=" %(gpInfo.Version) == '' And !Exists('%(gpInfo.VerFile)')"/>
-
-      <gpCacheClone Include="@(gpInfo)"
-        Condition=" '%(gpInfo.Attach)' == ''" />
+      <gpUnversioned Include="@(gpInfo)" 
+        Condition=" '%(gpInfo.Version)' == '' And %(gpInfo.Attach) == ''"/>
 
       <gpAttached Include="@(gpInfo)"
         Condition=" '%(gpInfo.Attach)' != ''" />
+
+      <gpAttachedNeedingRestore Include="@(gpInfo)"
+        Condition=" '%(gpInfo.Attach)' != '' And !Exists('gpInfo.VerFile')" />
+
+      <gpAutoRefreshUnversioned Include="@(gpUnversioned)"
+        Condition=" !Exists('%(gpUnversioned.VerFile)')"/>
+
+      <gpCacheClone Include="@(gpInfo)"
+        Condition=" '%(gpInfo.Attach)' == ''" />
 
     </ItemGroup>
 
@@ -134,9 +155,9 @@
 
   <Target Name="gpFetchWithUnversioned" Outputs="%(gpUnversioned.Identity)" DependsOnTargets="gpFetch">
 
-      <Message Text="Fetching latest for %(gpUnversioned.Identity)"
-        Condition=" @(gpUnversioned) != ''"
-        Importance="High"  />
+    <Message Text="Fetching latest for %(gpUnversioned.Identity)"
+      Condition=" @(gpUnversioned) != ''"
+      Importance="High"  />
 
     <Exec Command="git fetch --tags --prune origin master:master"
       StandardOutputImportance="High"
@@ -204,12 +225,8 @@
     <Touch Files='%(gpInfo.gpVerFile)' AlwaysCreate="true" />
   </Target>
 
-  <Target Name="gpCheckoutAttached"
-          Inputs="@(gpAttached)"
-          Outputs="%(gpAttached -> gpInfo.gpVerFile)"
+  <Target Name="gpCheckoutAttached" Outputs="%(gpAttached -> gpInfo.gpVerFile)"
           Condition="@(gpAttached) != ''">
-
-    <Message Text='cd $(PrjGist)  git clone -b %(gpAttached.Attach) "%(gpAttached.Uri)" "%(gpAttached.Identity)"' />
 
     <Exec Command='git clone -b %(gpAttached.Attach) "%(gpAttached.Uri)" "%(gpAttached.Identity)"'
         WorkingDirectory="$(PrjGist)"
