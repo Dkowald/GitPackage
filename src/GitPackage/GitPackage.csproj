@@ -9,7 +9,7 @@
     <Title>GitPackage</Title>
     <Description>MSBuild tooling to use a Git Repository as a Package</Description>
     <PackageTags>MSBuild Git Packages</PackageTags>
-    <Version>0.2.0</Version>
+    <Version>0.3.0</Version>
 
     <NeutralLanguage>en-AU</NeutralLanguage>
     <RepositoryType>Git</RepositoryType>
