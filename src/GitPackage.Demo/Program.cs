@@ -3,9 +3,9 @@ using Microsoft.AspNetCore.Hosting;
 
 namespace GitPackage.Demo
 {
-    static class Program
+    public static class Program
     {
-        static void Main(string[] args)
+        public static void Main(string[] args)
         {
             var host = WebHost
                 .CreateDefaultBuilder<Startup>(args)

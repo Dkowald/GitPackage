@@ -1,13 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Hosting;
+﻿using Microsoft.Extensions.FileProviders;
 
 namespace GitPackage.Demo.Model
 {
-  public class WikiPage
-  {
-    
-  }
+    public class WikiPage
+    {
+        public string Name;
+        public IFileInfo ContentFile;
+        public string DisplayName;
+    }
 }

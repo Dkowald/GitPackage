@@ -1,7 +1,57 @@
-﻿@{
-  var path = ViewBag.Path;
-}
+﻿@model GitPackage.Demo.Controllers.Wiki.Model
+@section styles
+{
+  <style>
+    body {
+      margin: 1.5em;
+    }
+    .almostStdPage{
+      display:grid;
 
-<main>
-  @ViewBag.Content
-</main>
+      grid-template-rows: 5rem auto 2.5rem;
+      grid-template-columns: auto 15rem;
+      grid-template-areas:
+                         "header header"
+                         "main nav"
+                         "footer footer";
+    }
+
+    .almostStdPage header {
+      grid-area: header;
+
+      border-bottom: lightgray 1px solid;
+    }
+    .almostStdPage main {
+      grid-area: main;
+    }
+    .almostStdPage aside {
+      grid-area: nav;
+    }
+
+    aside ul {
+      list-style: none;
+    }
+    aside li {
+      line-height: 2.5em;
+      border: lightgray 1px solid;
+      padding-left: .25rem;
+    }
+
+    aside a {
+      text-decoration: none;
+    }
+  </style>
+}
+<div class="almostStdPage">
+  <header>
+    <h1>@Model.Title</h1>
+  </header>
+
+  <main>
+    @Model.Content
+  </main>
+
+  <aside>
+    <vc:wiki-pages />
+  </aside>
+</div>

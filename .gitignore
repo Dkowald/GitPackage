@@ -1,8 +1,10 @@
 .vscode/
 .vs/
 
+/*.user
 src/**/*.user
 
 bin/
 obj/
 lib/
+

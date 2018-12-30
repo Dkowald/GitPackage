@@ -1,13 +1,12 @@
-﻿using GitPackage.Demo.Components;
-using GitPackage.Demo.Model;
+﻿using GitPackage.Demo.Services;
+
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.IdentityModel.Tokens.Saml;
 
 namespace GitPackage.Demo
 {
-	public class Startup
+    public class Startup
 	{
 		private readonly IConfiguration _config;
 
@@ -21,13 +20,12 @@ namespace GitPackage.Demo
 			services.AddMvc()
 				.AddControllersAsServices();
 
-		  services.AddScoped<WikiPageProvider>();
-      services.AddScoped<WikiPages>();
+			services.AddSingleton<WikiPageProvider>();
 		}
 
 		public void Configure(IApplicationBuilder app)
 		{
-		  app.UseDeveloperExceptionPage();
+			app.UseDeveloperExceptionPage();
 
 			app.UseMvcWithDefaultRoute();
 		}

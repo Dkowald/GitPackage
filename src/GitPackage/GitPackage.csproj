@@ -17,7 +17,7 @@
     <PackageProjectUrl>https://github.com/Dkowald/GitPackage</PackageProjectUrl>
     <RepositoryUrl>https://github.com/Dkowald/GitPackage</RepositoryUrl>
     <PackageReleaseNotes>
-      Add support for git packages without a specific version.
+      Add support for Attached package.
     </PackageReleaseNotes>
 
     <DisableImplicitFrameworkReferences>true</DisableImplicitFrameworkReferences>
