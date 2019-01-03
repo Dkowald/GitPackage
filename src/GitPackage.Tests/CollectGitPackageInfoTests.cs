@@ -12,10 +12,13 @@ namespace GitPackage.Tests
     public class CollectGitPackageInfoTests
     {
         private readonly string _root;
+
+        private readonly string _samplePackage = "Sample";
+
         public CollectGitPackageInfoTests()
         {
             _root = Path.GetFullPath(
-                Path.Combine(Directory.GetCurrentDirectory(), "../../../", "gist"));
+                Path.Combine(Directory.GetCurrentDirectory(), "../../../", "TestData", "GitPackageInfo"));
         }
 
         [TestMethod]
@@ -26,7 +29,7 @@ namespace GitPackage.Tests
                 Root = _root,
                 Items = new ITaskItem[]
                 {
-                    new TaskItem("AbsUrl",
+                    new TaskItem(_samplePackage,
                         new Dictionary<string, string> {{"Version", "1.0.0"}, {"Uri", "https://gist.git"}})
                 }
             };
@@ -35,16 +38,16 @@ namespace GitPackage.Tests
 
             Assert.IsTrue(result);
 
-            var absUrl = target.Info.Single(x => x.ItemSpec == "AbsUrl");
+            var sample = target.Info.Single(x => x.ItemSpec == _samplePackage);
 
-            var data = new PackageInfoMetaData(absUrl);
+            var data = new PackageInfoMetaData(sample);
 
             Assert.AreEqual("1.0.0", data.Version);
             Assert.AreEqual("https://gist.git", data.Uri);
 
-            Assert.AreEqual("AbsUrl.ver", Path.GetFileName(data.VerFile));
+            Assert.AreEqual($"{_samplePackage}.ver", Path.GetFileName(data.VerFile));
             Assert.AreEqual("1.0.0", data.Actual);
-            Assert.AreEqual("AbsUrl", Path.GetFileName(data.Workspace));
+            Assert.AreEqual(_samplePackage, Path.GetFileName(data.Workspace));
         }
 
         [TestMethod]
@@ -58,14 +61,14 @@ namespace GitPackage.Tests
 
             target.Execute();
 
-            var absUrl = target.Info.SingleOrDefault(x => x.ItemSpec == "AbsUrl");
+            var sample = target.Info.SingleOrDefault(x => x.ItemSpec == _samplePackage);
 
-            var data = new PackageInfoMetaData(absUrl);
+            var data = new PackageInfoMetaData(sample);
 
-            Assert.IsNotNull(absUrl, "Item not in project, but .ver file exists");
+            Assert.IsNotNull(sample, "Item not in project, but .ver file exists");
             Assert.AreEqual("", data.Version);
             Assert.AreEqual("", data.Uri);
-            Assert.AreEqual("AbsUrl.ver", Path.GetFileName(data.VerFile));
+            Assert.AreEqual($"{_samplePackage}.ver", Path.GetFileName(data.VerFile));
         }
     }
 }

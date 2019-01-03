@@ -10,16 +10,23 @@
   </ItemGroup>
   <Import Project="../../../GitPackage/build/GitPackage.targets"/>
 
-  <Import Project="../../TestData.targets"/>
-
+<PropertyGroup>
+		<!--Sample repo pre-setup for tests-->
+		<SampleRepo>$(MSBuildProjectDirectory)/../SampleRepo</SampleRepo>
+	</PropertyGroup>
+  
 <!--Get same repo packages for different project -->
 <ItemGroup>
-  <!-- <GitPackage Include="SampleUnversioned" Uri="$(SampleRepo)" /> -->
+  <GitPackage Include="SampleUnversioned" Uri="$(SampleRepo)" />
 
-  <!-- <GitPackage Include="SampleTaged" Version='1' Uri="$(SampleRepo)"  /> -->
+  <GitPackage Include="SampleTaged" Version='1' Uri="$(SampleRepo)"  />
 
   <!-- <GitPackage Include="SampleTaged"  Version='3' Uri="$(SampleRepo)" /> -->
     
 </ItemGroup>
+
+<Target Name="GistClean" AfterTargets="Clean">
+  <RemoveDir Directories="./gist" />
+</Target>
 
 </Project>
