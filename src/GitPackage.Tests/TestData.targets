@@ -259,7 +259,7 @@
 
 		<Error Text="Expected build fail" Condition=" '$(MSBuildLastTaskResult)' == 'true'"/>
 
-		<Message Importance="High" Text="PASS"/>
+		<Message Importance="High" Text="PASS (expected build fail)"/>
 
 	</Target>
 

@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Linq;
 
 using Microsoft.Build.Framework;
@@ -24,6 +25,13 @@ namespace GitPackage
         {
             var infoItems = Items.Select(x => new TaskItem(x))
                 .Cast<ITaskItem>().ToList();
+
+            var dupes = String.Join("; ", 
+                infoItems.GroupBy(x => x.ItemSpec).Where(x => x.Count() > 1).Select(x => x.Key));
+            if (!string.IsNullOrWhiteSpace(dupes))
+            {
+                throw new Exception("Duplicate packages found: "+dupes);
+            }
 
             foreach (var verFile in Directory.EnumerateFiles(Root, "*.ver"))
             {
