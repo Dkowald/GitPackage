@@ -40,10 +40,13 @@
   </Target>
 
   <Target Name="gpAutoRestoreInVStudio"
-          BeforeTargets="Build"
+          BeforeTargets="ResolveProjectReferences"
           DependsOnTargets="gpAutoRestore"
           Condition="$(BuildingInsideVisualStudio) == 'true'">
-    <!--Because restore target doesn't appear to run in VStudio...-->
+    <!--
+		This will include GitPackage restore in visual-studio design time builds.
+		See: https://github.com/dotnet/project-system/blob/master/docs/design-time-builds.md
+	-->
   </Target>
 
   <Target Name="gpInit">
