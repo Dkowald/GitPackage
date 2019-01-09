@@ -9,7 +9,7 @@
     <Title>GitPackage</Title>
     <Description>MSBuild tooling to use a Git Repository as a Package</Description>
     <PackageTags>MSBuild Git Packages</PackageTags>
-    <Version>0.3.0</Version>
+    <Version>0.4.0</Version>
 
     <NeutralLanguage>en-AU</NeutralLanguage>
     <RepositoryType>Git</RepositoryType>
@@ -17,7 +17,7 @@
     <PackageProjectUrl>https://github.com/Dkowald/GitPackage</PackageProjectUrl>
     <RepositoryUrl>https://github.com/Dkowald/GitPackage</RepositoryUrl>
     <PackageReleaseNotes>
-      Add support for Attached package.
+      Better visual studio experiance using design-time builds.
     </PackageReleaseNotes>
 
     <DisableImplicitFrameworkReferences>true</DisableImplicitFrameworkReferences>

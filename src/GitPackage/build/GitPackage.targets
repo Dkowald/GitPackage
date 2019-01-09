@@ -8,7 +8,7 @@
 
     <GitPack-AutoRestore Condition="'$(GitPack-AutoRestore)' == ''">true</GitPack-AutoRestore>
 
-    <GitPackage-Version>0.3.0</GitPackage-Version>
+    <GitPackage-Version>0.4.0</GitPackage-Version>
   </PropertyGroup>
 
   <PropertyGroup>
