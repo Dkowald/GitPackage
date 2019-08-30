@@ -1,7 +1,8 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-
+using System.Xml.Linq;
+using GitPackage.Tests.Helpers;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -19,6 +20,55 @@ namespace GitPackage.Tests
         {
             _root = Path.GetFullPath(
                 Path.Combine(Directory.GetCurrentDirectory(), "../../../", "TestData", "GitPackageInfo"));
+        }
+
+        [TestMethod]
+        public void PrepMSBuildTestData()
+        {
+            var doc = new XDocument(new XElement("Project",
+                new XElement("PropertyGroup",
+                    new XElement("SampleRepo_CacheFolder",
+                        CollectGitPackageInfo.GenerateShortFolderName(Files.SampleRepo.FullName))
+                    )));
+
+            using(var wr = Files.MSBuildExtraData.CreateText())
+                doc.Save(wr);
+
+            Assert.IsTrue(Files.MSBuildExtraData.Exists);
+        }
+
+        [TestMethod]
+        public void GenerateCloneFolderFromUri()
+        {
+            var target = new CollectGitPackageInfo
+            {
+                Root = _root,
+                Items = new ITaskItem[]
+                {
+                    new TaskItem("Sample",
+                        new Dictionary<string, string> {{"Version", "1.0.0"}, {"Uri", "https://server1/gist.git"}}),
+                    new TaskItem("Sample_SameRepo",
+                    new Dictionary<string, string> {{"Version", "1.0.0"}, {"Uri", "https://server1/gist.git"}}),
+                    new TaskItem("Sample_DifRepo",
+                        new Dictionary<string, string> {{"Version", "1.0.0"}, {"Uri", "https://server2/gist.git"}})
+                }
+            };
+
+            target.Execute();
+
+            var sample = new PackageInfoMetaData(target.Info[0]);
+            var sampleSameRepo = new PackageInfoMetaData(target.Info[1]);
+            var difRepo = new PackageInfoMetaData(target.Info[2]);
+
+            Assert.IsNotNull(sample.CloneFolderName, "Got a repo folder to use");
+            Assert.AreEqual(sample.CloneFolderName, sampleSameRepo.CloneFolderName, 
+                "Same repo folder for same repo");
+
+            Assert.AreNotEqual(sample.CloneFolderName, difRepo.CloneFolderName, 
+                "Different repo folders");
+
+            Assert.IsFalse(sample.CloneFolderName.IndexOfAny(Path.GetInvalidPathChars()) > -1, "No invalid path chars");
+            Assert.IsFalse(difRepo.CloneFolderName.IndexOfAny(Path.GetInvalidPathChars()) > -1, "No invalid path chars");
         }
 
         [TestMethod]

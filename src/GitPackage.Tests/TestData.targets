@@ -1,13 +1,20 @@
 <Project>
-	<PropertyGroup>
-		<!--Sample repository for tests-->
+  <!--Import generated data.-->
+  <Import Project="./TestData.generated.props" />
+
+  <PropertyGroup>
+    <!--Sample repository for tests-->
 		<SampleRepo>$(MSBuildProjectDirectory)/TestData/SampleRepo</SampleRepo>
 	</PropertyGroup>
 
+  <!--Target under test-->
+  <Import Project="../GitPackage/build/GitPackage.targets" />
+  
 	<Target Name="TestSetup">
 
-		<Message Text='(Re)Creating Sample Repository'/>
-		<Exec Command='powershell.exe –NonInteractive -command "&amp; ./TestData/SampleRepo.Create.ps1 $(SampleRepo)"'
+		<Message Condition="!Exists('$(SampleRepo)')" Text='(Re)Creating Sample Repository'/>
+		<Exec Condition="!Exists('$(SampleRepo)')"
+      Command='powershell.exe –NonInteractive -command "&amp; ./TestData/SampleRepo.Create.ps1 $(SampleRepo)"'
 		      StandardOutputImportance='low'
 		      StandardErrorImportance='low'
 		      ConsoleToMSBuild='true' />
@@ -70,6 +77,13 @@
 			<GitPackage Include="SampleTaged" Version='inValidVersion' Uri="$(SampleRepo)" />
 		</ItemGroup>
 	</Target>
+  
+  <Target Name="RepoFolder" DependsOnTargets="TestSetup">
+    <Message Importance="High" Text="Clone repository to specific cache folder" />
+    <ItemGroup>
+      <GitPackage Include="SampleTaged" Version='1' Uri="$(SampleRepo)"  />
+    </ItemGroup>
+  </Target>
 
 	<Target Name="Test1" DependsOnTargets="TestSetup">
 
@@ -145,7 +159,7 @@
 		<MSBuild Projects ="$(MSBuildProjectFullPath)" Properties="Run=1"
 		         Targets="SampleUnversioned;GitPackRestore" />
 
-		<Error Condition="!Exists('$(GitRepoCache)/SampleUnversioned/')" Text="Expected cached clone"  />
+		<Error Condition="!Exists('$(GitRepoCache)/$(SampleRepo_CacheFolder)/')" Text="Expected cached clone"  />
 		<Error Condition="!Exists('gist/SampleUnversioned.ver')" Text="Expected version file"  />
 		<Error Condition="!Exists('gist/SampleUnversioned/4')" Text="Expected check-out file"/>
 

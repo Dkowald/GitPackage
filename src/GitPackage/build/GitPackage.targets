@@ -78,7 +78,7 @@
           <gpCommitish Condition=" '%(gpInfo.Version)' == '' And '%(gpInfo.Attach)' == ''">--detach master</gpCommitish>
 
           <!--Use repo cache except for attached-->
-          <gpRepoDir Condition="'%(gpInfo.Attach)' == ''">$(GitRepoCache)\%(gpInfo.Identity)</gpRepoDir>
+          <gpRepoDir Condition="'%(gpInfo.Attach)' == ''">$(GitRepoCache)\%(gpInfo.CloneFolderName)</gpRepoDir>
           <gpRepoDir Condition="'%(gpInfo.Attach)' != ''">$(PrjGist)\%(gpInfo.Identity)</gpRepoDir>
 
           <gpVerFile>$(PrjGist)\%(gpInfo.Identity).ver</gpVerFile>
@@ -110,18 +110,18 @@
   </Target>
 
   <Target Name="gpClone" Inputs="@(gpCacheClone)" 
-    Outputs="@(gpCacheClone -> '$(GitRepoCache)/%(Identity)/.git/')"
+    Outputs="@(gpCacheClone -> '%(gpRepoDir)/.git/')"
     Condition="'@(gpCacheClone)' != ''">
     <!-- This will clone for every repository used with different name -->
     <Message
-        Text="Clone '%(gpCacheClone.Uri)' to '%(gpCacheClone.Identity)'"
+        Text="Clone '%(gpCacheClone.Uri)' to '%(gpCacheClone.CloneFolderName)'"
         Condition="!Exists('%(gpCacheClone.gpRepoDir)' )"
         Importance="High"  />
         <PropertyGroup>
           <gitCloneCmd>-1</gitCloneCmd>
         </PropertyGroup>
 
-    <Exec Command="git clone --bare %(gpCacheClone.Uri) %(gpCacheClone.Identity)"
+    <Exec Command="git clone --bare %(gpCacheClone.Uri) %(gpCacheClone.gpRepoDir)"
         WorkingDirectory="$(GitRepoCache)"
         Condition="!Exists('%(gpCacheClone.gpRepoDir)')" />
 
@@ -145,7 +145,7 @@
     </Exec>
 
     <Message
-      Text="Fetching latest for %(gpVersioned.Identity)"
+      Text="Fetching latest for %(gpVersioned.gpRepoDir)"
       Condition="$(foundMatchingTag) != '0'"
       Importance="High"  />
 

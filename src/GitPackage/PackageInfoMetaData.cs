@@ -14,6 +14,7 @@ namespace GitPackage
             VerFile = fromItem?.GetMetadata(nameof(VerFile));
             Actual = fromItem?.GetMetadata(nameof(Actual));
             Workspace = fromItem?.GetMetadata(nameof(Workspace));
+            CloneFolderName = fromItem?.GetMetadata(nameof(CloneFolderName));
         }
 
         public string Version { get; set; }
@@ -22,5 +23,7 @@ namespace GitPackage
         public string VerFile { get; set; }
         public string Actual { get; set; }
         public string Workspace { get; set; }
+
+        public string CloneFolderName { get; set; }
     }
 }

@@ -1,6 +1,8 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
+using System.Security.Cryptography;
+using System.Text;
 
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
@@ -11,6 +13,25 @@ namespace GitPackage
 {
     public class CollectGitPackageInfo : Task
     {
+        /// <summary>
+        /// Given a full url (file or web) present it as a
+        /// deterministic (mostly) unique short folder name.
+        /// </summary>
+        public static string GenerateShortFolderName(string fullUri, HashAlgorithm hasher)
+        {
+            var deterministicHash = BitConverter.ToString(
+                    hasher.ComputeHash(Encoding.UTF8.GetBytes(fullUri)))
+                .Replace("-","").ToLower();
+
+            var result = $"{Path.GetFileNameWithoutExtension(fullUri)}_{deterministicHash}";
+            return result;
+        }
+        
+        public static string  GenerateShortFolderName(string fullUri)
+        { using(var hasher = SHA1.Create())
+            return GenerateShortFolderName(fullUri, hasher);
+        }
+
         [Required]
         public string Root { get; set; }
 
@@ -26,7 +47,7 @@ namespace GitPackage
             var infoItems = Items.Select(x => new TaskItem(x))
                 .Cast<ITaskItem>().ToList();
 
-            var dupes = String.Join("; ", 
+            var dupes = string.Join("; ", 
                 infoItems.GroupBy(x => x.ItemSpec).Where(x => x.Count() > 1).Select(x => x.Key));
             if (!string.IsNullOrWhiteSpace(dupes))
             {
@@ -62,9 +83,32 @@ namespace GitPackage
                 }
             }
 
+            
+            using(var sh1 = SHA1.Create())
+                foreach (var item in infoItems)
+                {
+                    MetadataForCloneFileName(sh1, item);
+                }
+
             Info = infoItems.ToArray();
 
             return true;
+        }
+
+        private ITaskItem MetadataForCloneFileName(HashAlgorithm hasher, ITaskItem data)
+        {
+            var folderName =
+                data.GetMetadata(nameof(PackageInfoMetaData.CloneFolderName));
+
+            if (string.IsNullOrWhiteSpace(folderName))
+            {
+                var uri = data.GetMetadata(nameof(PackageInfoMetaData.Uri));
+                
+                folderName = GenerateShortFolderName(uri, hasher);
+
+                data.SetMetadata(nameof(PackageInfoMetaData.CloneFolderName), folderName);
+            }
+            return data;
         }
     }
 }

@@ -8,3 +8,5 @@ bin/
 obj/
 lib/
 
+#Generated
+/src/GitPackage.Tests/TestData.generated.props
