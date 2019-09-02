@@ -19,6 +19,11 @@ namespace GitPackage
         /// </summary>
         public static string GenerateShortFolderName(string fullUri, HashAlgorithm hasher)
         {
+            if (fullUri == null) 
+                throw new ArgumentNullException(nameof(fullUri));
+
+            fullUri = fullUri.Trim().ToLower().Replace("\\", "/");
+
             var deterministicHash = BitConverter.ToString(
                     hasher.ComputeHash(Encoding.UTF8.GetBytes(fullUri)))
                 .Replace("-","").ToLower();

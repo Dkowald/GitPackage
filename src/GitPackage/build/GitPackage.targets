@@ -174,7 +174,8 @@
   </Target>
 
   <Target Name="gpFetchAutoRefresh">
-      <Exec Command="git fetch --tags --prune origin master:master"
+    <Message Text="Fetch (auto) %(gpAutoRefreshUnversioned.gpRepoDir)"/>
+    <Exec Command="git fetch --tags --prune origin master:master"
       StandardOutputImportance="High"
       StandardErrorImportance="High"
       WorkingDirectory="%(gpAutoRefreshUnversioned.gpRepoDir)"
