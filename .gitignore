@@ -10,3 +10,8 @@ lib/
 
 #Generated
 /src/GitPackage.Tests/TestData.generated.props
+
+
+/src/GitPackage.Tests/TestData/BasicProject/**/*
+!/src/GitPackage.Tests/TestData/BasicProject/BasicProject.csproj
+!/src/GitPackage.Tests/TestData/BasicProject/NuGet.config

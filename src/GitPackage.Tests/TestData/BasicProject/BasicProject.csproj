@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
+  </PropertyGroup>
+  
+  <PropertyGroup>
+    <SampleRepo>$(MSBuildProjectDirectory)/../SampleRepo</SampleRepo>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="GitPackage" Version="*" PrivateAssets="All" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <GitPackage Include="SampleRepo" Uri="$(SampleRepo)" />
+  </ItemGroup>
+
+  <Target Name="ResetLocalPackageCache" BeforeTargets="Restore">
+    <Message Importance="High" Text="Deleting local: '$(MSBuildProjectDirectory)/pkg'"/>
+    <RemoveDir Directories="$(MSBuildProjectDirectory)/pkg" />
+  </Target>
+</Project>
