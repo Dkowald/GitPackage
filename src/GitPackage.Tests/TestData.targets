@@ -12,17 +12,16 @@
   
 	<Target Name="TestSetup">
 
-		<Message Condition="!Exists('$(SampleRepo)')" Text='(Re)Creating Sample Repository'/>
-		<Exec Condition="!Exists('$(SampleRepo)')"
-      Command='powershell.exe –NonInteractive -command "&amp; ./TestData/SampleRepo.Create.ps1 $(SampleRepo)"'
-		      StandardOutputImportance='low'
-		      StandardErrorImportance='low'
-		      ConsoleToMSBuild='true' />
+    <!--this is expensive; but current test cases depend on known repo state.-->
+    <Message Text='(Re)Creating Sample Repository'/>
+    <Exec Command='powershell.exe –NonInteractive -command "&amp; ./TestData/SampleRepo.Create.ps1 $(SampleRepo)"'
+          StandardOutputImportance='low'
+          StandardErrorImportance='low'
+          ConsoleToMSBuild='true' />
 
 		<Message Text="Deleting cached sample repositories"/>
 		<ItemGroup>
-			<SampleRepo Include="$(GitRepoCache)/SampleUnversioned" />
-			<SampleRepo Include="$(GitRepoCache)/SampleTaged" />
+			<SampleRepo Include="$(GitRepoCache)/$(SampleRepo_CacheFolder)" />
 		</ItemGroup>
 		<RemoveDir Directories="@(SampleRepo)" />
 
@@ -36,7 +35,7 @@
 		<Delete Files="@(VerFiles)"/>
 		<RemoveDir Directories="@(Folders)" />
 	</Target>
-
+  
 	<Target Name="SampleAttached">
 		<ItemGroup>
 			<GitPackage Include="SampleAttached" Uri="$(SampleRepo)" Attach="master" />
@@ -153,13 +152,11 @@
 	<Target Name="Test2" DependsOnTargets="TestSetup">
 		
 		<Message Importance="High" Text="Add and remove un-versioned package"/>
-
-		<Error Condition="Exists('$(GitRepoCache)/SampleUnversioned/')" Text="Expected NO cached clone"  />
-
+		
 		<MSBuild Projects ="$(MSBuildProjectFullPath)" Properties="Run=1"
 		         Targets="SampleUnversioned;GitPackRestore" />
 
-		<Error Condition="!Exists('$(GitRepoCache)/$(SampleRepo_CacheFolder)/')" Text="Expected cached clone"  />
+		<Error Condition="!Exists('$(GitRepoCache)/$(SampleRepo_CacheFolder)')" Text="Expected cached clone"  />
 		<Error Condition="!Exists('gist/SampleUnversioned.ver')" Text="Expected version file"  />
 		<Error Condition="!Exists('gist/SampleUnversioned/4')" Text="Expected check-out file"/>
 
@@ -170,8 +167,6 @@
 		<Error Condition="Exists('gist/SampleUnversioned/')" Text="Expected no work-tree folder"/>
 
 		<Message Importance="High" Text="PASS"/>
-
-
 	</Target>
 
 	<Target Name="Test2-1" DependsOnTargets="TestSetup">
@@ -199,7 +194,7 @@
 		<MSBuild Projects ="$(MSBuildProjectFullPath)" Properties="Run=1"
 		         Targets="SampleAttached;SampleUnversioned;GitPackRestore" />
 
-		<Error Condition="!Exists('gist/SampleUnversioned/4')" Text="Expected check-out file"/>
+		<Error Condition="!Exists('gist/SampleUnversioned/4')" Text="Expected check-out file: 4"/>
 		
 		<CallTarget Targets="_sampleAttachedUpdate4To5" />
 
@@ -216,13 +211,11 @@
 	<Target Name="Test3" DependsOnTargets="TestSetup">
 
 		<Message Importance="High" Text="Versioned package update" />
-
-		<Error Condition="Exists('$(GitRepoCache)/SampleTaged/')" Text="Expected NO cached clone"  />
-
+		
 		<MSBuild Projects ="$(MSBuildProjectFullPath)" Properties="Run=1"
 		         Targets="SampleV1;GitPackRestore" />
 
-		<Error Condition="!Exists('$(GitRepoCache)/SampleTaged/')" Text="Expected cached clone"  />
+		<Error Condition="!Exists('$(GitRepoCache)/$(SampleRepo_CacheFolder)/')" Text="Expected cached clone"  />
 		<Error Condition="!Exists('gist/SampleTaged/1')" Text="Expected file: 1"  />
 
 		<MSBuild Projects ="$(MSBuildProjectFullPath)" Properties="Run=2"

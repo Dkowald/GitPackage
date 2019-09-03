@@ -22,7 +22,18 @@ namespace GitPackage
             if (fullUri == null) 
                 throw new ArgumentNullException(nameof(fullUri));
 
-            fullUri = fullUri.Trim().ToLower().Replace("\\", "/");
+            if(!Uri.TryCreate(fullUri, UriKind.Absolute, out var uri) )
+                uri = new Uri("file://"+fullUri);
+
+            if (uri.IsFile)
+            {
+                fullUri = Path.GetFullPath(uri.LocalPath).ToLower()
+                    .Replace('\\', '/');
+            }
+            else
+            {
+                fullUri = uri.ToString().ToLower();
+            }
 
             var deterministicHash = BitConverter.ToString(
                     hasher.ComputeHash(Encoding.UTF8.GetBytes(fullUri)))

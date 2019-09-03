@@ -38,6 +38,38 @@ namespace GitPackage.Tests
         }
 
         [TestMethod]
+        public void GenerateCloneFolderFromFileUri()
+        {
+            var target = new CollectGitPackageInfo
+            {
+                Root = _root,
+                Items = new ITaskItem[]
+                {
+                    new TaskItem("Sample",
+                        new Dictionary<string, string> {{"Version", "1.0.0"}, {"Uri", "c:/temp/sub/../repo.git"}}),
+                    new TaskItem("Sample2",
+                        new Dictionary<string, string> {{"Version", "1.0.0"}, {"Uri", "file:///c:\\TEMP\\repo.git"}}),
+                    new TaskItem("Sample3",
+                        new Dictionary<string, string> {{"Version", "1.0.0"}, {"Uri", "/TEMP/repo.git"}}),
+                }
+            };
+
+            target.Execute();
+
+            var sample = new PackageInfoMetaData(target.Info[0]);
+            var sampleSameRepo = new PackageInfoMetaData(target.Info[1]);
+            
+            
+            Assert.IsNotNull(sample.CloneFolderName, "Got a repo folder to use");
+            Assert.AreEqual(sample.CloneFolderName, sampleSameRepo.CloneFolderName, 
+                "Same repo folder for same repo");
+
+            var sample3 = new PackageInfoMetaData(target.Info[2]);
+            Assert.IsNotNull(sample3.CloneFolderName);
+
+        }
+
+        [TestMethod]
         public void GenerateCloneFolderFromUri()
         {
             var target = new CollectGitPackageInfo

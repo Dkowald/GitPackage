@@ -5,9 +5,6 @@
   </PropertyGroup>
 
   <!--Direct add project for testing-->
-  <ItemGroup>
-    <ProjectReference Include="../../../GitPackage/GitPackage.csproj"/>
-  </ItemGroup>
   <Import Project="../../../GitPackage/build/GitPackage.targets"/>
 
 <PropertyGroup>

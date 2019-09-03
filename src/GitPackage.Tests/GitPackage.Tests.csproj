@@ -20,6 +20,7 @@
     <!--Dont let test data get into the build process-->
     <Compile Remove="TestData\**" />
     <EmbeddedResource Remove="TestData\**" />
+    <None Include="TestData\**" />
   </ItemGroup>
 
 </Project>
