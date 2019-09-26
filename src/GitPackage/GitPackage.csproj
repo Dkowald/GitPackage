@@ -37,4 +37,15 @@
     <PackageReference Include="NETStandard.Library" Version="2.0.1" PrivateAssets="All" />
   </ItemGroup>
 
+   <Target Name="GenerateVersionProperty" BeforeTargets="Build">
+     <ItemGroup>
+       <Line Include="&lt;Project&gt;"/>
+       <Line Include="  &lt;PropertyGroup&gt;"/>
+       <Line Include="    &lt;GitPackage-Version&gt;$(Version)&lt;/GitPackage-Version&gt;"/>
+       <Line Include="  &lt;/PropertyGroup&gt;"/>
+       <Line Include="&lt;/Project&gt;"/>
+     </ItemGroup>
+     <WriteLinesToFile Overwrite="true" File="$(MSBuildThisFileDirectory)/build/GitPackage.props" Lines="@(Line)" />
+   </Target>
+
 </Project>

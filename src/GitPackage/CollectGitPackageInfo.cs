@@ -52,7 +52,6 @@ namespace GitPackage
         public string Root { get; set; }
 
         [Required]
-        
         public ITaskItem[] Items { get; set; }
 
         [Output]
@@ -94,11 +93,10 @@ namespace GitPackage
 
                 using (var rd = File.OpenText(verFile))
                 {
-                    var data = rd.ReadLine();
-                    info.SetMetadata(nameof(PackageInfoMetaData.Actual), data);
+                    var data = rd.ReadLine()?.Split(':') ?? new string[]{null};
+                    info.SetMetadata(nameof(PackageInfoMetaData.Actual), data.Last()?.Trim());
                 }
             }
-
             
             using(var sh1 = SHA1.Create())
                 foreach (var item in infoItems)

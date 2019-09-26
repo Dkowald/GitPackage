@@ -9,9 +9,11 @@ obj/
 lib/
 
 #Generated
+/src/GitPackage/build/Gitpackage.props
+
 /src/GitPackage.Tests/TestData.generated.props
 
-
-/src/GitPackage.Tests/TestData/BasicProject/**/*
-!/src/GitPackage.Tests/TestData/BasicProject/BasicProject.csproj
-!/src/GitPackage.Tests/TestData/BasicProject/NuGet.config
+#Test data
+/src/GitPackage.Tests/TestData/OtherTestProject/**/*
+!/src/GitPackage.Tests/TestData/OtherTestProject/OtherTestProject.csproj
+/src/GitPackage.Tests/App_Data/

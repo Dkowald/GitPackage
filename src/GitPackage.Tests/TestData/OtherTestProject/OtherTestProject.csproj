@@ -7,23 +7,19 @@
   <!--Direct add project for testing-->
   <Import Project="../../../GitPackage/build/GitPackage.targets"/>
 
-<PropertyGroup>
-		<!--Sample repo pre-setup for tests-->
-		<SampleRepo>$(MSBuildProjectDirectory)/../SampleRepo</SampleRepo>
-	</PropertyGroup>
   
-<!--Get same repo packages for different project -->
-<ItemGroup>
-  <GitPackage Include="SampleUnversioned" Uri="$(SampleRepo)" />
+  <PropertyGroup>
+    <TestRepository>$(MSBuildProjectDirectory)/../../App_Data/TestRepository</TestRepository>
+  </PropertyGroup>
+  
+  <!--Get same repo packages for different project -->
+  <ItemGroup>
+    <GitPackage Include="TestRepository" Uri="$(TestRepository)" />
+  </ItemGroup>
 
-  <GitPackage Include="SampleTaged" Version='1' Uri="$(SampleRepo)"  />
-
-  <!-- <GitPackage Include="SampleTaged"  Version='3' Uri="$(SampleRepo)" /> -->
-    
-</ItemGroup>
-
-<Target Name="GistClean" AfterTargets="Clean">
-  <RemoveDir Directories="./gist" />
-</Target>
+  <Target Name="GistClean" AfterTargets="Clean">
+    <RemoveDir Directories="./gist" />
+    <RemoveDir Directories="./obj" />
+  </Target>
 
 </Project>

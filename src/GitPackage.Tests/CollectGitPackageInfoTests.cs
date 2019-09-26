@@ -12,24 +12,21 @@ namespace GitPackage.Tests
     [TestClass]
     public class CollectGitPackageInfoTests
     {
-        private readonly string _root;
-
-        private readonly string _samplePackage = "Sample";
-
-        public CollectGitPackageInfoTests()
-        {
-            _root = Path.GetFullPath(
-                Path.Combine(Directory.GetCurrentDirectory(), "../../../", "TestData", "GitPackageInfo"));
-        }
+        private readonly string _root = 
+            Files.InfoRead.InfoReadFolder.FullName;
 
         [TestMethod]
         public void PrepMSBuildTestData()
         {
             var doc = new XDocument(new XElement("Project",
+                new XComment("Generated file:" +
+                            $" use {nameof(PrepMSBuildTestData)} " +
+                             " to refresh for local"),
                 new XElement("PropertyGroup",
-                    new XElement("SampleRepo_CacheFolder",
-                        CollectGitPackageInfo.GenerateShortFolderName(Files.SampleRepo.FullName))
-                    )));
+                    new XElement("TestRepository_CacheFolder", 
+                        CollectGitPackageInfo.GenerateShortFolderName(Files.TestRepository.FullName))
+                    ))
+            );
 
             using(var wr = Files.MSBuildExtraData.CreateText())
                 doc.Save(wr);
@@ -111,7 +108,7 @@ namespace GitPackage.Tests
                 Root = _root,
                 Items = new ITaskItem[]
                 {
-                    new TaskItem(_samplePackage,
+                    new TaskItem("Versioned",
                         new Dictionary<string, string> {{"Version", "1.0.0"}, {"Uri", "https://gist.git"}})
                 }
             };
@@ -120,16 +117,16 @@ namespace GitPackage.Tests
 
             Assert.IsTrue(result);
 
-            var sample = target.Info.Single(x => x.ItemSpec == _samplePackage);
+            var sample = target.Info.Single(x => x.ItemSpec == "Versioned");
 
             var data = new PackageInfoMetaData(sample);
 
             Assert.AreEqual("1.0.0", data.Version);
             Assert.AreEqual("https://gist.git", data.Uri);
 
-            Assert.AreEqual($"{_samplePackage}.ver", Path.GetFileName(data.VerFile));
+            Assert.AreEqual("Versioned.ver", Path.GetFileName(data.VerFile));
             Assert.AreEqual("1.0.0", data.Actual);
-            Assert.AreEqual(_samplePackage, Path.GetFileName(data.Workspace));
+            Assert.AreEqual("Versioned", Path.GetFileName(data.Workspace));
         }
 
         [TestMethod]
@@ -138,19 +135,22 @@ namespace GitPackage.Tests
             var target = new CollectGitPackageInfo
             {
                 Root = _root,
-                Items = new ITaskItem[] { }
+                Items = new ITaskItem[] { }//no packages in project
             };
 
             target.Execute();
 
-            var sample = target.Info.SingleOrDefault(x => x.ItemSpec == _samplePackage);
+            var unVersioned = target.Info.Single(x => x.ItemSpec == "UnVersioned");
 
-            var data = new PackageInfoMetaData(sample);
+            var data = new PackageInfoMetaData(unVersioned);
 
-            Assert.IsNotNull(sample, "Item not in project, but .ver file exists");
-            Assert.AreEqual("", data.Version);
+            Assert.IsNotNull(unVersioned, "Item not in project, but .ver file exists");
+            Assert.AreEqual("", data.Actual);
             Assert.AreEqual("", data.Uri);
-            Assert.AreEqual($"{_samplePackage}.ver", Path.GetFileName(data.VerFile));
+            Assert.AreEqual("UnVersioned.ver", Path.GetFileName(data.VerFile));
+
+            var versioned = new PackageInfoMetaData(target.Info.Single(x => x.ItemSpec == "Versioned"));
+            Assert.AreEqual("1.0.0", versioned.Actual);
         }
     }
 }

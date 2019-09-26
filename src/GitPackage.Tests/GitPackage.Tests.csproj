@@ -18,9 +18,14 @@
 
   <ItemGroup>
     <!--Dont let test data get into the build process-->
-    <Compile Remove="TestData\**" />
-    <EmbeddedResource Remove="TestData\**" />
-    <None Include="TestData\**" />
+    <Compile Remove="App_Data\**" />
+    <EmbeddedResource Remove="App_Data\**" />
+    <None Include="App_Data\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="TestData\OtherTestProject\OtherTestProject.csproj" />
+    <None Include="Tests.proj" />
   </ItemGroup>
 
 </Project>

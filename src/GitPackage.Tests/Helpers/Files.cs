@@ -11,8 +11,21 @@ namespace GitPackage.Tests.Helpers
         public static FileInfo MSBuildExtraData =>
             new FileInfo(Path.Combine(TestProject.FullName, "TestData.generated.props"));
 
-        public static DirectoryInfo SampleRepo => 
+        public static DirectoryInfo TestRepository => 
             new DirectoryInfo(Path.Combine(
-                TestProject.FullName, "TestData/SampleRepo"));
+                TestProject.FullName, "App_Data/TestRepository"));
+
+        public static class InfoRead
+        {
+            public static DirectoryInfo InfoReadFolder=>
+            new DirectoryInfo(
+                Path.Combine(TestProject.FullName, "TestData/InfoRead"));
+
+            public static FileInfo VersionedFile => new FileInfo(
+                Path.Combine(InfoReadFolder.FullName, "Versioned.ver"));
+
+            public static FileInfo UnVersionedFile => new FileInfo(
+                Path.Combine(InfoReadFolder.FullName, "UnVersioned.ver"));
+        }
     }
 }

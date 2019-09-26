@@ -1,0 +1,317 @@
+<Project>
+  <!--Import generated data.-->
+  <Import Project="./TestData.generated.props" />
+
+  <PropertyGroup>
+    <!--Sample repository for tests-->
+		<TestRepository>$(MSBuildProjectDirectory)/App_Data/TestRepository</TestRepository>
+	</PropertyGroup>
+
+  <!--Target under test-->
+  <Import Project="../GitPackage/build/GitPackage.targets" />
+
+  <Target Name="_testRepository_Init">
+    <Message Text="Test: ReBuild sample update repo" Importance="high" />
+    
+    <RemoveDir Directories="$(TestRepository)" Condition="Exists('$(TestRepository)')" />
+    <RemoveDir Directories="$(GitRepoCache)/$(TestRepository_CacheFolder)" Condition="Exists('$(GitRepoCache)/$(TestRepository_CacheFolder)')" />
+    <MakeDir Directories="$(TestRepository)" />
+
+    <Exec Command="git init" WorkingDirectory="$(TestRepository)" 
+          StandardOutputImportance="normal"/>
+
+    <Touch Files="$(TestRepository)/1" AlwaysCreate="true"/>
+    <Exec Command="git stage -A" WorkingDirectory="$(TestRepository)" StandardOutputImportance="normal"/>
+    <Exec Command="git commit -m 1" WorkingDirectory="$(TestRepository)" StandardOutputImportance="normal"/>
+    <Exec Command="git tag 1" WorkingDirectory="$(TestRepository)" StandardOutputImportance="normal"/>
+
+    <Delete Files="gist/TestRepository.ver" Condition="Exists('gist/TestRepository.ver')"/>
+    <RemoveDir Directories="gist/TestRepository" Condition="Exists('gist/TestRepository')"/>
+  </Target>
+
+  <Target Name="_testRepository_Do">
+    <Message Text="Test: Update sample update repo" Importance="High"/>
+
+    <Delete Files="$(TestRepository)/1"/>
+    <Touch Files="$(TestRepository)/2" AlwaysCreate="true"/>
+    <Exec Command="git stage -A" WorkingDirectory="$(TestRepository)" StandardOutputImportance="normal" />
+    <Exec Command="git commit -m 2" WorkingDirectory="$(TestRepository)" StandardOutputImportance="normal"/>
+    <Exec Command="git tag 2" WorkingDirectory="$(TestRepository)" StandardOutputImportance="normal"/>
+  </Target>
+
+  <Target Name="_testRepository_Delete">
+    <Message Text="Test: Delete test repository (so can verify no fetch)" Importance="High"/>
+    <RemoveDir Directories="$(TestRepository)" Condition="Exists('$(TestRepository)')" />
+  </Target>
+
+  <Target Name="UseTestRepository">
+    <ItemGroup>
+      <GitPackage Include="TestRepository" Uri="$(TestRepository)"/>
+    </ItemGroup>
+  </Target>
+  <Target Name="UseTestRepository_v1">
+    <ItemGroup>
+      <GitPackage Include="TestRepository" Uri="$(TestRepository)" Version="1"/>
+    </ItemGroup>
+  </Target>
+  <Target Name="UseTestRepository_v2">
+    <ItemGroup>
+      <GitPackage Include="TestRepository" Uri="$(TestRepository)" Version="2"/>
+    </ItemGroup>
+  </Target>
+  
+  <Target Name="AddAndRemoveVersioned" DependsOnTargets="_testRepository_Init;_testRepository_Do">
+    <Message Text="Test: add remove versioned package" Importance="High"/>
+
+    <MSBuild Projects ="$(MSBuildProjectFullPath)" Properties="Run=2"
+             Targets="UseTestRepository_v2;GitPackRestore" />
+    <Error Condition="!Exists('$(GitRepoCache)/$(TestRepository_CacheFolder)')" Text="Expected cached clone"  />
+    <Error Condition="!Exists('gist/TestRepository.ver')" Text="Expected version file"  />
+    <Error Condition="!Exists('gist/TestRepository/2')" Text="Expected check-out file 2"/>
+
+    <MSBuild Projects ="$(MSBuildProjectFullPath)" Properties="Run=3"
+             Targets="GitPackRestore" />
+
+    <Error Condition="Exists('gist/TestRepository.ver')" Text="Expected version file removed"  />
+    <Error Condition="Exists('gist/TestRepository')" Text="Expected folder remove"/>
+
+    <Message Importance="High" Text="Test: PASS"/>
+  </Target>
+
+	<Target Name="AddAndRemoveUnversioned" DependsOnTargets="_testRepository_Init">
+		
+		<Message Importance="High" Text="Test: Add and remove un-versioned package"/>
+		
+		<MSBuild Projects ="$(MSBuildProjectFullPath)" Properties="Run=1"
+		         Targets="UseTestRepository;GitPackRestore" />
+
+		<Error Condition="!Exists('$(GitRepoCache)/$(TestRepository_CacheFolder)')" Text="Expected cached clone"  />
+		<Error Condition="!Exists('gist/TestRepository.ver')" Text="Expected version file"  />
+		<Error Condition="!Exists('gist/TestRepository/1')" Text="Expected check-out file 1"/>
+
+		<MSBuild Projects ="$(MSBuildProjectFullPath)" Properties="Run=2"
+		         Targets="GitPackRestore" />
+
+		<Error Condition="Exists('gist/TestRepository.ver')" Text="Expected no version file"  />
+		<Error Condition="Exists('gist/TestRepository/')" Text="Expected no work-tree folder"/>
+
+		<Message Importance="High" Text="Test: PASS"/>
+	</Target>
+  
+  <Target Name="RefreshUnversioned" DependsOnTargets="_testRepository_Init">
+		
+		<Message Importance="High" Text="Test: un-versioned package update with refresh build target"/>
+
+		<MSBuild Projects ="$(MSBuildProjectFullPath)" Properties="Run=1"
+		         Targets="UseTestRepository;GitPackRestore" />
+
+		<Error Condition="!Exists('gist/TestRepository/1')" Text="Expected check-out file"/>
+		
+		<CallTarget Targets="_testRepository_Do" />
+		
+    <Message Text="Refresh unversioned uses a fetch" />
+		<MSBuild Projects ="$(MSBuildProjectFullPath)" Properties="Run=2"
+		         Targets="UseTestRepository;GitPackRefresh" />
+
+		<Error Condition="!Exists('gist/TestRepository/2')" Text="Expected check-out file: 2"/>
+		<Message Importance="High" Text="Test: PASS"  />
+	</Target>
+
+  <Target Name="RefreshVersioned" DependsOnTargets="_testRepository_Init">
+		
+    <Message Importance="High" Text="Test: versioned package no fetch on refresh"/>
+
+    <MSBuild Projects ="$(MSBuildProjectFullPath)" Properties="Run=1"
+             Targets="UseTestRepository_v1;GitPackRestore" />
+
+    <Error Condition="!Exists('gist/TestRepository/1')" Text="Expected check-out file"/>
+		
+    <CallTarget Targets="_testRepository_Delete" />
+		
+    <Message Text="Refresh versioned doesnt need to fetch" />
+    <MSBuild Projects ="$(MSBuildProjectFullPath)" Properties="Run=2"
+             Targets="UseTestRepository_v1;GitPackRefresh" />
+
+    <Error Condition="!Exists('gist/TestRepository/1')" Text="Expected check-out file: 1"/>
+    <Message Importance="High" Text="Test: PASS"  />
+  </Target>
+
+	<Target Name="AutoRefreshUnversioned" DependsOnTargets="_testRepository_Init">
+
+		<Message Importance="High" Text="Test: Auto refresh un-versioned package"/>
+
+		<MSBuild Projects ="$(MSBuildProjectFullPath)" Properties="Run=1"
+		         Targets="UseTestRepository;GitPackRestore" />
+
+    <Error Condition="!Exists('gist/TestRepository/1')" Text="Expected check-out file"/>
+		
+		<CallTarget Targets="_testRepository_Do" />
+
+    <Message Text="Delete version file to trigger restore with fetch on unversioned" />
+		<Delete Files="gist/TestRepository.ver"/>
+
+		<MSBuild Projects ="$(MSBuildProjectFullPath)" Properties="Run=2;GitPack-AutoRestore=true"
+		         Targets="UseTestRepository;gpAutoRestore" />
+
+    <Error Condition="!Exists('gist/TestRepository/2')" Text="Expected updated file 2"/>
+
+		<Message Importance="High" Text="Test: PASS"/>
+
+	</Target>
+
+  <Target Name="AutoRefreshVersioned" DependsOnTargets="_testRepository_Init">
+
+    <Message Importance="High" Text="Test: Auto refresh versioned package"/>
+
+    <MSBuild Projects ="$(MSBuildProjectFullPath)" Properties="Run=1"
+             Targets="UseTestRepository_v1;GitPackRestore" />
+
+    <Error Condition="!Exists('gist/TestRepository/1')" Text="Expected file 1"/>
+		
+    <CallTarget Targets="_testRepository_Do" />
+
+    <Message Text="Delete version file no fetch with versioned" />
+    <Delete Files="gist/TestRepository.ver"/>
+    <CallTarget Targets="_testRepository_Delete"/>
+
+    <MSBuild Projects ="$(MSBuildProjectFullPath)" Properties="Run=2"
+             Targets="UseTestRepository_v1;gpAutoRestore" />
+
+    <Error Condition="!Exists('gist/TestRepository/1')" Text="Expected file 1"/>
+
+    <Message Importance="High" Text="Test: PASS"/>
+
+  </Target>
+
+	<Target Name="VersionedPackageUseFetchToGetNewVersion" DependsOnTargets="_testRepository_Init">
+
+		<Message Importance="High" Text="Test: Versioned package update" />
+		
+		<MSBuild Projects ="$(MSBuildProjectFullPath)" Properties="Run=1"
+		         Targets="UseTestRepository_v1;GitPackRestore" />
+
+		<Error Condition="!Exists('gist/TestRepository/1')" Text="Expected file: 1"  />
+
+    <CallTarget Targets="_testRepository_Do"/>
+
+		<MSBuild Projects ="$(MSBuildProjectFullPath)" Properties="Run=2"
+		         Targets="UseTestRepository_v2;GitPackRestore" />
+
+		<Error Condition="!Exists('gist/TestRepository/2')" Text="Expected file: 2"  />
+
+		<Message Importance="High" Text="Test: PASS" />
+	</Target>
+
+  <Target Name="RestoreUnversionedDoesNotFetch" DependsOnTargets="_testRepository_Init">
+    <Message Importance="High" Text="Test: Get package that will be updated" />
+    
+    <MSBuild Projects ="$(MSBuildProjectFullPath)" Properties="Run=1"
+             Targets="UseTestRepository;GitPackRestore" />
+
+    <Error Condition="!Exists('gist/TestRepository/1')" Text="Expected file: 1"  />
+
+    <Message Text="Delete test repository so fetch would fail" />
+    <CallTarget Targets="_testRepository_Delete" />
+
+    <MSBuild Projects ="$(MSBuildProjectFullPath)" Properties="Run=2"
+             Targets="UseTestRepository;GitPackRestore" />
+    <Error Condition="!Exists('gist/TestRepository/1')" 
+           Text="Expected GitPackRestore not to fetch new stuff"  />
+
+    <Message Text="Test: PASS" Importance="High"/>
+  </Target>
+
+  <Target Name="PackageUsedInMultipleProjects" DependsOnTargets="_testRepository_Init">
+    
+    <Message Importance="High" Text="Test: Checkout in different projects"/>
+
+    <RemoveDir Directories="App_Data/OtherTestProject" Condition="Exists('App_Data/OtherProject')"/>
+    <Copy DestinationFolder="App_Data/OtherTestProject" SourceFiles="TestData/OtherTestProject/OtherTestProject.csproj"/>
+
+    <PropertyGroup>
+      <Other>$(MSBuildProjectDirectory)/App_Data/OtherTestProject</Other>
+      <OtherProject>$(Other)/OtherTestProject.csproj</OtherProject>
+    </PropertyGroup>
+    
+    <MSBuild Projects ="$(OtherProject)" Properties="Run=1"
+             Targets="Clean" />
+		
+    <Error Condition="Exists('$(Other)/gist')" Text="Expected clean folder in other project"  /> 
+
+    <MSBuild Projects ="$(OtherProject)" Properties="Run=2"
+             Targets="GitPackRestore" />
+
+    <Error Condition="!Exists('$(Other)/gist/TestRepository/')" Text="Expected folder for un-versioned"  /> 
+    <Error Condition="!Exists('$(Other)/gist/TestRepository/1')" Text="Expected file: 1"  />
+
+    <MSBuild Projects ="$(MSBuildProjectFullPath)" Properties="Run=3"
+             Targets="UseTestRepository_v1;GitPackRestore" />
+
+    <Error Condition="!Exists('gist/TestRepository/')" Text="Expected folder for un-versioned"  /> 
+    <Error Condition="!Exists('gist/TestRepository/1')" Text="Expected file: 1"  />
+
+    <Message Importance="High" Text="Test: PASS" />
+  </Target>
+
+  <Target Name="UseFetchToGetSpecifiedVersion" DependsOnTargets="_testRepository_Init">
+
+    <Message Importance="High" Text="Test: Versioned package triggers fetch if needed"/>
+
+    <MSBuild Projects ="$(MSBuildProjectFullPath)" Properties="Run=1"
+             Targets="UseTestRepository;GitPackRestore" />
+
+    <Error Condition="!Exists('gist/TestRepository/1')" Text="Expected file: 1"  />
+
+    <CallTarget Targets="_testRepository_Do" />
+
+    <Message Text="Update to get a version that is not in local clone."/>
+
+    <MSBuild Projects ="$(MSBuildProjectFullPath)" Properties="Run=2"
+             Targets="UseTestRepository_v2;GitPackRestore" />
+
+    <Error Condition="!Exists('gist/TestRepository/2')" Text="Expected file: 2"  />
+
+    <Message Importance="High" Text="Test: PASS"/>
+
+  </Target>
+
+  <Target Name="SwapBetweenVersionAndUnversioned" DependsOnTargets="_testRepository_Init">
+
+    <Message Importance="High" Text="Test: Swapping version to unversion"/>
+
+    <CallTarget Targets="_testRepository_Do" />
+
+    <MSBuild Projects ="$(MSBuildProjectFullPath)" Properties="Run=1"
+             Targets="UseTestRepository_v1;GitPackRestore" />
+
+    <Error Condition="!Exists('gist/TestRepository/1')" Text="Expected file: 1"  />
+
+    <MSBuild Projects ="$(MSBuildProjectFullPath)" Properties="Run=2"
+             Targets="UseTestRepository;GitPackRestore" />
+
+    <Error Condition="!Exists('gist/TestRepository/2')" Text="Expected file: 2"  />
+
+    <MSBuild Projects ="$(MSBuildProjectFullPath)" Properties="Run=1"
+             Targets="UseTestRepository_v1;GitPackRestore" />
+
+    <Error Condition="!Exists('gist/TestRepository/1')" Text="Expected file: 1"  />
+
+    <Message Importance="High" Text="Test: PASS"/>
+
+  </Target>
+
+	<Target Name="VersionedPackageInvalidVersion" DependsOnTargets="_testRepository_Init">
+
+		<Message Importance="High" Text="Test: Versioned package fails build if no version found"/>
+
+		<MSBuild Projects ="$(MSBuildProjectFullPath)" Properties="Run=1"
+		         Targets="UseTestRepository_v2;GitPackRestore" 
+             ContinueOnError="WarnAndContinue" />
+		
+		<Error Text="Expected build fail" Condition=" '$(MSBuildLastTaskResult)' == 'true'"/>
+
+		<Message Importance="High" Text="Test: PASS (expected build fail)"/>
+
+	</Target>
+ 
+</Project>

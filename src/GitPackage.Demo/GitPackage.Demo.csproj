@@ -19,6 +19,6 @@
     <GitPackage Include="AbsUrl" Version="1.0.0" Uri="https://gist.github.com/383acd462242194024981fbe53a84980.git" />
     <GitPackage Include="ResponseBuffer" Uri="https://gist.github.com/Dkowald/28ea6f6bd38562c131a76052587c6268" />
 
-    <GitPackage Include="GitPackageWiki" Uri="https://github.com/Dkowald/GitPackage.wiki.git" Attach="master" />
+    <GitPackage Include="GitPackageWiki" Uri="https://github.com/Dkowald/GitPackage.wiki.git"/>
   </ItemGroup>
 </Project>
