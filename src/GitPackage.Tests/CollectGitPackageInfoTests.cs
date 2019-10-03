@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Xml.Linq;
 using GitPackage.Tests.Helpers;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
@@ -16,22 +15,55 @@ namespace GitPackage.Tests
             Files.InfoRead.InfoReadFolder.FullName;
 
         [TestMethod]
-        public void PrepMSBuildTestData()
+        public void MergedDataIgnoresFileSystemCase()
         {
-            var doc = new XDocument(new XElement("Project",
-                new XComment("Generated file:" +
-                            $" use {nameof(PrepMSBuildTestData)} " +
-                             " to refresh for local"),
-                new XElement("PropertyGroup",
-                    new XElement("TestRepository_CacheFolder", 
-                        CollectGitPackageInfo.GenerateShortFolderName(Files.TestRepository.FullName))
-                    ))
-            );
+            var target = new CollectGitPackageInfo
+            {
+                Root = _root,
+                Items = new[]
+                {
+                    new TaskItem("versioned"),
+                    new TaskItem("orphan"),
+                    new TaskItem("UnVersioned"), 
+                }
+            };
 
-            using(var wr = Files.MSBuildExtraData.CreateText())
-                doc.Save(wr);
+            target.Execute();
+            Assert.AreEqual(3, target.Info.Length, "match same item even if case differs");
 
-            Assert.IsTrue(Files.MSBuildExtraData.Exists);
+            var versioned = new PackageInfoMetaData(target.Info.Single(x => x.ItemSpec == "versioned"));
+            Assert.AreEqual("1.0.0", versioned.Actual);
+        }
+        
+        [TestMethod]
+        public void BuildCheckoutCommitish()
+        {
+            var target = new CollectGitPackageInfo
+            {
+                Root = _root,
+                Items = new ITaskItem[]
+                {
+                    new TaskItem("Versioned",
+                        new Dictionary<string, string>
+                        {
+                            {"Uri", "git://repo1"},
+                            {"Version", "1.0.0"}
+                        }),
+                    new TaskItem("UnVersioned",
+                        new Dictionary<string, string>
+                        {
+                            {"Uri", "git://repo2"}
+                        })
+                }
+            };
+
+            target.Execute();
+
+            var versioned = new PackageInfoMetaData(target.Info.Single(x => x.ItemSpec == "Versioned"));
+            var unVersioned = new PackageInfoMetaData(target.Info.Single(x => x.ItemSpec == "UnVersioned"));
+
+            Assert.AreEqual("1.0.0", versioned.WorkTreeCommit, "use provided version ");
+            Assert.AreEqual("--detach master", unVersioned.WorkTreeCommit, "Use master for un-versioned");
         }
 
         [TestMethod]
@@ -109,7 +141,12 @@ namespace GitPackage.Tests
                 Items = new ITaskItem[]
                 {
                     new TaskItem("Versioned",
-                        new Dictionary<string, string> {{"Version", "1.0.0"}, {"Uri", "https://gist.git"}})
+                        new Dictionary<string, string>
+                        {
+                            {"Version", "2.0.0"}, 
+                            {"Uri", "https://gist.git"}
+                        }),
+                    new TaskItem("MyPackage")
                 }
             };
             
@@ -117,16 +154,38 @@ namespace GitPackage.Tests
 
             Assert.IsTrue(result);
 
-            var sample = target.Info.Single(x => x.ItemSpec == "Versioned");
+            var versioned = target.Info.Single(x => x.ItemSpec == "Versioned");
 
-            var data = new PackageInfoMetaData(sample);
+            var data = new PackageInfoMetaData(versioned);
 
-            Assert.AreEqual("1.0.0", data.Version);
+            Assert.AreEqual("2.0.0", data.Version, "TaskItem is for version 2");
             Assert.AreEqual("https://gist.git", data.Uri);
+            Assert.AreEqual("Versioned.ver", Path.GetFileName(data.VersionFile));
+            Assert.AreEqual("1.0.0", data.Actual, "Version in file");
+            Assert.AreEqual("Versioned", Path.GetFileName(data.WorkTreeFolder));
 
-            Assert.AreEqual("Versioned.ver", Path.GetFileName(data.VerFile));
-            Assert.AreEqual("1.0.0", data.Actual);
-            Assert.AreEqual("Versioned", Path.GetFileName(data.Workspace));
+            var myPackage = target.Info.SingleOrDefault(x => x.ItemSpec == "MyPackage");
+            Assert.IsNotNull(myPackage, "Keeps the provided task item");
+        }
+
+        [TestMethod]
+        public void ReadsItemsFromFolder()
+        {
+            var target = new CollectGitPackageInfo
+            {
+                Root = _root
+            };
+
+            target.Execute();
+
+            Assert.IsNotNull(target.Info.SingleOrDefault(x => x.ItemSpec == "Versioned"), 
+                "Found versioned");
+
+            Assert.IsNotNull(target.Info.SingleOrDefault(x => x.ItemSpec == "UnVersioned"),
+                "Found unVersioned");
+
+            Assert.IsNotNull(target.Info.SingleOrDefault(x => x.ItemSpec == "Orphan"),
+                "Found orphan folder");
         }
 
         [TestMethod]
@@ -147,10 +206,30 @@ namespace GitPackage.Tests
             Assert.IsNotNull(unVersioned, "Item not in project, but .ver file exists");
             Assert.AreEqual("", data.Actual);
             Assert.AreEqual("", data.Uri);
-            Assert.AreEqual("UnVersioned.ver", Path.GetFileName(data.VerFile));
+            Assert.AreEqual("UnVersioned.ver", Path.GetFileName(data.VersionFile));
 
             var versioned = new PackageInfoMetaData(target.Info.Single(x => x.ItemSpec == "Versioned"));
             Assert.AreEqual("1.0.0", versioned.Actual);
+        }
+
+        [TestMethod]
+        public void PackageRemovedFromProject()
+        {
+            var projectItems = new ITaskItem[]
+            {
+                new TaskItem("UnVersioned", new Dictionary<string, string>
+                    {{"Uri", "https://gist.git"}})
+            };
+
+            var target = new CollectGitPackageInfo
+                {Root = _root, Items = projectItems};
+
+            Assert.IsTrue(target.Execute());
+
+            var data = target.Info.Select(x => new PackageInfoMetaData(x));
+            var toRemove = data.Where(x => string.IsNullOrWhiteSpace(x.Uri));
+            
+            Assert.AreEqual(2, toRemove.Count(), "Expect to remove orphan and versioned");
         }
     }
 }

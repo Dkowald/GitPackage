@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
@@ -48,18 +49,28 @@ namespace GitPackage
             return GenerateShortFolderName(fullUri, hasher);
         }
 
+        /// <summary>
+        /// Root folder containing the current version files.
+        /// </summary>
         [Required]
         public string Root { get; set; }
 
+        /// <summary>
+        /// Collection of GitPackage items to process.
+        /// </summary>
         [Required]
         public ITaskItem[] Items { get; set; }
 
+        /// <summary>
+        /// GitPackage items with metadata.
+        /// </summary>
         [Output]
         public ITaskItem[] Info { get; set; }
 
         public override bool Execute()
         {
-            var infoItems = Items.Select(x => new TaskItem(x))
+            var infoItems = (Items ?? Array.Empty<ITaskItem>())
+                .Select(x => new TaskItem(x))
                 .Cast<ITaskItem>().ToList();
 
             var dupes = string.Join("; ", 
@@ -69,6 +80,34 @@ namespace GitPackage
                 throw new Exception("Duplicate packages found: "+dupes);
             }
 
+            infoItems = AppendMissingItemsFromFileSystem(infoItems);
+            
+            using (var sh1 = SHA1.Create())
+            {
+                foreach (var item in infoItems)
+                {
+                    var info = new PackageInfoMetaData(item);
+
+                    info.VersionFile = Path.Combine(Root, info.ItemSpec + ".ver");
+                    
+                    info.Actual = ReadActualVersion(info);
+
+                    info.WorkTreeFolder = Path.Combine(Root, info.ItemSpec);
+                    
+                    info.WorkTreeCommit = GetWorkTreeCommitFromVersion(info.Version);
+
+                    GetCloneFolderName(sh1, item);
+
+                }
+            }
+
+            Info = infoItems.ToArray();
+
+            return true;
+        }
+
+        private List<ITaskItem> AppendMissingItemsFromFileSystem(List<ITaskItem> items)
+        {
             foreach (var verFile in Directory.EnumerateFiles(Root, "*.ver"))
             {
                 var id = Path.GetFileNameWithoutExtension(verFile);
@@ -78,38 +117,31 @@ namespace GitPackage
                     continue;
                 }
 
-                var info = infoItems.SingleOrDefault(x => x.ItemSpec == id);
-                if (info == null)
+                var found = items.SingleOrDefault(x => x.ItemSpec.Equals(id, StringComparison.OrdinalIgnoreCase));
+                if (found == null)
                 {
-                    info = new TaskItem(id);
-                    infoItems.Add(info);
-                }
+                    found = new TaskItem(id);
+                    found.SetMetadata(nameof(PackageInfoMetaData.VersionFile), verFile);
 
-                info.SetMetadata(nameof(PackageInfoMetaData.VerFile), verFile);
-
-                var workSpace = Path.Combine(Root, id);
-                if (Directory.Exists(workSpace))
-                { info.SetMetadata(nameof(PackageInfoMetaData.Workspace), workSpace); }
-
-                using (var rd = File.OpenText(verFile))
-                {
-                    var data = rd.ReadLine()?.Split(':') ?? new string[]{null};
-                    info.SetMetadata(nameof(PackageInfoMetaData.Actual), data.Last()?.Trim());
+                    items.Add(found);
                 }
             }
-            
-            using(var sh1 = SHA1.Create())
-                foreach (var item in infoItems)
+
+            foreach (var dir in Directory.EnumerateDirectories(Root))
+            {
+                var id = Path.GetFileName(dir);
+                var found = items.SingleOrDefault(x => x.ItemSpec.Equals(id, StringComparison.OrdinalIgnoreCase));
+                if (found == null)
                 {
-                    MetadataForCloneFileName(sh1, item);
+                    found = new TaskItem(id);
+                    items.Add(found);
                 }
+            }
 
-            Info = infoItems.ToArray();
-
-            return true;
+            return items;
         }
 
-        private ITaskItem MetadataForCloneFileName(HashAlgorithm hasher, ITaskItem data)
+        private ITaskItem GetCloneFolderName(HashAlgorithm hasher, ITaskItem data)
         {
             var folderName =
                 data.GetMetadata(nameof(PackageInfoMetaData.CloneFolderName));
@@ -123,6 +155,29 @@ namespace GitPackage
                 data.SetMetadata(nameof(PackageInfoMetaData.CloneFolderName), folderName);
             }
             return data;
+        }
+
+        private string GetWorkTreeCommitFromVersion(string version)
+        {
+            //No version, just use detached master
+            if (string.IsNullOrWhiteSpace(version))
+                return "--detach master";
+
+            if (version[0] == '/' || version[0] == '\\')
+                return "tags/" + version;
+
+            return version;
+        }
+
+        private string ReadActualVersion(PackageInfoMetaData info)
+        {
+            if (!File.Exists(info.VersionFile)) return null;
+
+            using (var rd = File.OpenText(info.VersionFile))
+            {
+                var data = rd.ReadLine()?.Split(':') ?? new string[]{null};
+                return data.Length > 1 ? data.Last()?.Trim(): "";
+            }
         }
     }
 }

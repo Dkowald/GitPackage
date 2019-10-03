@@ -24,8 +24,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="TestData\OtherTestProject\OtherTestProject.csproj" />
     <None Include="Tests.proj" />
+    <None Include="TestData\OtherTestProject\OtherTestProject.csproj" />
   </ItemGroup>
-
+  
 </Project>

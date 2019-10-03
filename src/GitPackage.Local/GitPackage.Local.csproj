@@ -24,4 +24,9 @@
     <RemoveDir Directories="$(MSBuildProjectDirectory)/packages" Condition="Exists('$(MSBuildProjectDirectory)/packages')" />
     <RemoveDir Directories="$(MSBuildProjectDirectory)/gist" Condition="Exists('$(MSBuildProjectDirectory)/gist')"/>
   </Target>
+
+  <Target Name="Cleanerer" AfterTargets="Clean">
+    <RemoveDir Directories="$(MSBuildProjectDirectory)/bin" Condition="Exists('$(MSBuildProjectDirectory)/bin')" />
+    <RemoveDir Directories="$(MSBuildProjectDirectory)/obj" Condition="Exists('$(MSBuildProjectDirectory)/obj')" />
+  </Target>
 </Project>
