@@ -8,7 +8,7 @@ Add the following to your project .csproj
 ```XML
 <ItemGroup>
   <!--Nuget package to use git packages-->
-  <PackageReference Include="GitPackage" Version="0.4.0"
+  <PackageReference Include="GitPackage" Version="0.5.0"
     PrivateAssets="All" />
 
   <!-- git package(s) -->
