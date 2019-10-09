@@ -9,7 +9,7 @@
     <Title>GitPackage</Title>
     <Description>MSBuild tooling to use a Git Repository as a Package</Description>
     <PackageTags>MSBuild Git Packages</PackageTags>
-    <Version>0.4.0</Version>
+    <Version>0.5.0</Version>
 
     <NeutralLanguage>en-AU</NeutralLanguage>
     <RepositoryType>Git</RepositoryType>
@@ -17,7 +17,19 @@
     <PackageProjectUrl>https://github.com/Dkowald/GitPackage</PackageProjectUrl>
     <RepositoryUrl>https://github.com/Dkowald/GitPackage</RepositoryUrl>
     <PackageReleaseNotes>
-      Better visual studio experiance using design-time builds.
+      ## Removed Attached option
+      Prefere the use of git sub-modules if this function is needed.
+
+      ## Repository cache name now based on Uri
+      Using this approach the repository should only be cloned once per unique Uri.
+
+      The folder names are postfixed with a SHA1 hash of the uri.
+      This should save local HDD space.
+
+      ## Re design for simplificaiton
+      Removing the Attached option and fixing the cache folder allows for a simpler approach.
+
+      Took the opportunity to simplify code, and build better testing framework.
     </PackageReleaseNotes>
 
     <DisableImplicitFrameworkReferences>true</DisableImplicitFrameworkReferences>
