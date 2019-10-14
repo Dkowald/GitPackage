@@ -13,7 +13,7 @@
 
     <NeutralLanguage>en-AU</NeutralLanguage>
     <RepositoryType>Git</RepositoryType>
-    <PackageLicenseUrl>https://github.com/Dkowald/GitPackage/blob/master/LICENSE</PackageLicenseUrl>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/Dkowald/GitPackage</PackageProjectUrl>
     <RepositoryUrl>https://github.com/Dkowald/GitPackage</RepositoryUrl>
     <PackageReleaseNotes>
