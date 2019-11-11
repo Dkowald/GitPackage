@@ -1,0 +1,5 @@
+#Ignore GitPackages installed files.
+
+*.ver
+**/*
+!.gitignore

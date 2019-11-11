@@ -1,0 +1,3 @@
+[submodule "src/GitPackage.Docs/Wiki"]
+	path = src/GitPackage.Docs/Wiki
+	url = https://github.com/Dkowald/GitPackage.wiki.git

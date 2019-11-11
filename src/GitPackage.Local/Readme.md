@@ -6,10 +6,12 @@ main project.
 
 Use following steps to check package is ok
 Reset project so it will get latest package:
-dotnet clean
+
+Reset:
+*dotnet clean*
 
 Get latest nuget package:
-dotnet restore
+*dotnet restore*
 
 Build project to verify
-dotnet build
+*dotnet build*

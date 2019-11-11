@@ -1,0 +1,9 @@
+﻿@model GitPackage.Docs.Components.WikiPages
+<ul>
+  @foreach (var item in Model.Links)
+  {
+    <li>
+      <a href="@item.Url">@item.Name</a>
+    </li>
+  }
+</ul>
