@@ -1,3 +1,11 @@
+# Archived
+No longer progressing this repo.
+
+Originally I was using this to include source directly into other code.
+It was an alternative to using Git sub-modules; which I find problematic.
+
+As of now; a better approach would be to create a Nuget source package.
+
 # GitPackage
 .NET Tooling to use git repositories as packages.
 
